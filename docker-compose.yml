@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  grpc-sample:
+    container_name: grpc_sample
+    build: .
+    ports: 
+      - "10010:8080"
+    volumes:
+      - ./aimo_sample:/grpc_sample
+    tty: true
+    stdin_open: true
