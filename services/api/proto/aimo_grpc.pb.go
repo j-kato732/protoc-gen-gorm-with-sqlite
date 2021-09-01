@@ -97,5 +97,5 @@ var Aimo_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/aimo.proto",
+	Metadata: "proto/aimo.proto",
 }

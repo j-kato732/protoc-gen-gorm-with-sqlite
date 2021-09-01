@@ -2,9 +2,8 @@ syntax = "proto3";
 package grpc_sample;
 
 
-option go_package = "aimo_sample/api/proto";
+option go_package = "grpc_gateway_sample/proto";
 
-// import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 
 service aimo {

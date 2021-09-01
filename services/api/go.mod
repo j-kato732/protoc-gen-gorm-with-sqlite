@@ -1,4 +1,4 @@
-module aimo_sample
+module grpc_gateway_sample
 
 go 1.17
 

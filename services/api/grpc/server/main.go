@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pb "aimo_sample/api/proto"
+	pb "grpc_gateway_sample/proto"
 
 	"google.golang.org/grpc"
 )

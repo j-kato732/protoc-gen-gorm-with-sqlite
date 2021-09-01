@@ -1,12 +1,21 @@
 version: "3"
 
 services:
-  grpc-sample:
+  grpc-gateway-sample:
     container_name: grpc_gateway_sample
-    build: .
+    build: ./services/api
     ports:
       - "10020:9090"
     volumes:
-      - ./aimo_sample:/grpc_gateway_sample
+      - ./services/api:/grpc_gateway_sample
     tty: true
     stdin_open: true
+
+  db:
+    container_name: postgres
+    build: ./services/db
+    ports:
+      - "10030:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
