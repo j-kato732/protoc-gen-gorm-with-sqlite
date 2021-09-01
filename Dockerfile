@@ -11,7 +11,15 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 # v1.1.0
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
+RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+
+RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
+
 WORKDIR /grpc_gateway_sample
 RUN go mod init grpc_gateway_sample
 # grpc @ v1.40.0
 RUN go get google.golang.org/grpc@latest
+
+RUN go get github.com/grpc-ecosystem/grpc-gateway/v2
+
+RUN git clone https://github.com/googleapis/googleapis.git ${GOPATH}/src

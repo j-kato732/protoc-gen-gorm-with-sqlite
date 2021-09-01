@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"net"
 	"log"
+	"net"
 
-	pb "aimo_test/api/proto"
+	pb "aimo_sample/api/proto"
 
 	"google.golang.org/grpc"
 )
@@ -18,15 +18,15 @@ type getPeriodService struct {
 	pb.UnimplementedAimoServer
 }
 
-func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodRequest) (*pb.GetPeriodResponse, error){
+func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodRequest) (*pb.GetPeriodResponse, error) {
 	return &pb.GetPeriodResponse{
 		Response: &pb.DefaultResponse{
-			Status:	1,
+			Status:  1,
 			Message: "message",
 		},
 		Periods: []*pb.Period{
 			&pb.Period{
-				Id: 1,
+				Id:     1,
 				Period: "202105",
 			},
 		},
