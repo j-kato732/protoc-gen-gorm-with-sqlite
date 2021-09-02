@@ -22,4 +22,6 @@ RUN go get google.golang.org/grpc@latest
 
 RUN go get github.com/grpc-ecosystem/grpc-gateway/v2
 
+RUN go get github.com/lib/pq
+
 RUN git clone https://github.com/googleapis/googleapis.git ${GOPATH}/src

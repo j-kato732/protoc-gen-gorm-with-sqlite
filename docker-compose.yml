@@ -18,4 +18,16 @@ services:
       - "10030:5432"
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_PASSWORD: password+1
+
+  pgweb:
+    image: sosedoff/pgweb
+    container_name: pgweb
+    environment:
+      - DATABASE_URL=postgres://admin:password+1@db:5432/testdb?sslmode=disable
+    ports:
+      - "10031:8081"
+    links:
+      - db:postgres
+    restart: always
+
