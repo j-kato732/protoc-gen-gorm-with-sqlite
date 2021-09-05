@@ -35,7 +35,17 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 	con, err := psql_db.DB()
 	defer con.Close()
 
-	psql_db.Find(&periods)
+	var response_status int32
+	var response_message string
+
+	// SELECT * from period;
+	if err := psql_db.Find(&periods).Error; err != nil {
+		log.Println(err)
+		return nil, err
+	} else {
+		response_status = 1
+		response_message = ""
+	}
 
 	var response_periods []*pb.Period
 	for _, period := range periods {
@@ -47,10 +57,12 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 
 	return &pb.GetPeriodResponse{
 		Response: &pb.DefaultResponse{
-			Status:  1,
-			Message: "message",
+			Status:  response_status,
+			Message: response_message,
 		},
-		Periods: response_periods,
+		Result: &pb.Result{
+			Period: response_periods,
+		},
 	}, nil
 }
 
