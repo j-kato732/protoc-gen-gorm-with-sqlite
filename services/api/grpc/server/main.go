@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"reflect"
+	// "reflect"
 
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
@@ -25,7 +25,7 @@ type getPeriodService struct {
 	pb.UnimplementedAimoServer
 }
 
-var period model.Period
+var periods []model.Period
 
 func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodRequest) (*pb.GetPeriodResponse, error) {
 	psql_db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
@@ -35,23 +35,22 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 	con, err := psql_db.DB()
 	defer con.Close()
 
-	result := psql_db.Find(&period)
-	fmt.Println(reflect.TypeOf(result.Statement.ReflectValue.FieldByName("Period")))
-	reflect_value := result.Statement.ReflectValue
-	result_period := reflect_value.FieldByName("Period")
-	fmt.Println(reflect.TypeOf(result_period))
+	psql_db.Find(&periods)
+
+	var response_periods []*pb.Period
+	for _, period := range periods {
+		response_periods = append(response_periods, &pb.Period{
+			Id:     int32(period.ID),
+			Period: period.Period,
+		})
+	}
 
 	return &pb.GetPeriodResponse{
 		Response: &pb.DefaultResponse{
 			Status:  1,
 			Message: "message",
 		},
-		Periods: []*pb.Period{
-			&pb.Period{
-				Id:     1,
-				Period: period.Period,
-			},
-		},
+		Periods: response_periods,
 	}, nil
 }
 
