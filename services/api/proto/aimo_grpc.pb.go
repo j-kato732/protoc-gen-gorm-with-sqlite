@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AimoClient interface {
 	GetPeriod(ctx context.Context, in *GetPeriodRequest, opts ...grpc.CallOption) (*GetPeriodResponse, error)
+	GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
 }
 
 type aimoClient struct {
@@ -38,11 +39,21 @@ func (c *aimoClient) GetPeriod(ctx context.Context, in *GetPeriodRequest, opts .
 	return out, nil
 }
 
+func (c *aimoClient) GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error) {
+	out := new(GetUserInfoResponse)
+	err := c.cc.Invoke(ctx, "/grpc_sample.aimo/getUserInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AimoServer is the server API for Aimo service.
 // All implementations must embed UnimplementedAimoServer
 // for forward compatibility
 type AimoServer interface {
 	GetPeriod(context.Context, *GetPeriodRequest) (*GetPeriodResponse, error)
+	GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
 	mustEmbedUnimplementedAimoServer()
 }
 
@@ -52,6 +63,9 @@ type UnimplementedAimoServer struct {
 
 func (UnimplementedAimoServer) GetPeriod(context.Context, *GetPeriodRequest) (*GetPeriodResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPeriod not implemented")
+}
+func (UnimplementedAimoServer) GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
 }
 func (UnimplementedAimoServer) mustEmbedUnimplementedAimoServer() {}
 
@@ -84,6 +98,24 @@ func _Aimo_GetPeriod_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Aimo_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AimoServer).GetUserInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_sample.aimo/getUserInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AimoServer).GetUserInfo(ctx, req.(*GetUserInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Aimo_ServiceDesc is the grpc.ServiceDesc for Aimo service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -94,6 +126,10 @@ var Aimo_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getPeriod",
 			Handler:    _Aimo_GetPeriod_Handler,
+		},
+		{
+			MethodName: "getUserInfo",
+			Handler:    _Aimo_GetUserInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

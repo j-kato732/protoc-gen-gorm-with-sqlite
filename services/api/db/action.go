@@ -9,14 +9,17 @@ import (
 
 	"grpc_gateway_sample/db/model"
 	// pb "grpc_gateway_sample/proto"
-	pb "grpc_gateway_sample/proto"
+	// pb "grpc_gateway_sample/proto"
 )
 
 const (
 	conn = "host=db port=5432 user=admin password=password+1 dbname=testdb sslmode=disable TimeZone=Asia/Shanghai"
 )
 
-var periods []model.Period
+var (
+	periods   []model.Period
+	userInfos model.UserInfo
+)
 
 func main() {
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
@@ -32,6 +35,11 @@ func main() {
 		db.AutoMigrate(periods)
 	}
 
+	isExist := db.Migrator().HasTable("userInfos")
+	if isExist == false {
+		db.AutoMigrate(userInfos)
+	}
+
 	// db.Create(&model.Period{Period: "202111"})
 
 	// result := db.Model(&period).First(&period)
@@ -39,19 +47,19 @@ func main() {
 		fmt.Println(err)
 	}
 
-	var response_periods []*pb.Period
+	// var response_periods []*pb.Period
 
-	for _, period := range periods {
-		fmt.Println(period.Period)
-		fmt.Println(period.ID)
-		response_periods = append(response_periods, &pb.Period{
-			Id:     int32(period.ID),
-			Period: period.Period,
-		})
-	}
+	// for _, period := range periods {
+	// 	fmt.Println(period.Period)
+	// 	fmt.Println(period.ID)
+	// 	response_periods = append(response_periods, &pb.Period{
+	// 		Id:     int32(period.ID),
+	// 		Period: period.Period,
+	// 	})
+	// // }
 
-	// fmt.Println(periods)
-	fmt.Println(response_periods)
+	// // fmt.Println(periods)
+	// fmt.Println(response_periods)
 	// fmt.Println(period.Period)
 	// fmt.Println(result.RowsAffected)
 	// fmt.Println(result.Statement.Context)
