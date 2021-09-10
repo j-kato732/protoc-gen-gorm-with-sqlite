@@ -25,7 +25,7 @@ RUN go get github.com/grpc-ecosystem/grpc-gateway/v2
 # RUN go get github.com/lib/pq
 
 # RUN go get -u github.com/jinzhu/gorm
-RUN go get -u github.com/gorm.io/gorm
-RUN go get -u github.com/gorm.io/driver/postgres
+RUN go get -u gorm.io/gorm
+RUN go get -u gorm.io/driver/postgres
 
 RUN git clone https://github.com/googleapis/googleapis.git ${GOPATH}/src
