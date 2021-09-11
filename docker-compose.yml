@@ -20,7 +20,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password+1
     volumes:
-      - ./services/db/postgres:/var/lib/postgresql/data
+      - ./services/db/postgres:/var/lib/postgresql
 
   pgweb:
     image: sosedoff/pgweb
