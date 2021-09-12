@@ -15,6 +15,8 @@ RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 
 RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
 
+RUN go install github.com/infobloxopen/protoc-gen-gorm@latest
+
 WORKDIR /grpc_gateway_sample
 RUN go mod init grpc_gateway_sample
 # grpc @ v1.40.0
