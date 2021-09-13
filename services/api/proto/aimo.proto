@@ -5,6 +5,8 @@ package grpc_sample;
 option go_package = "grpc_gateway_sample/proto";
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-gorm/proto/options/gorm.proto";
 
 service aimo {
     rpc getPeriod(getPeriodRequest) returns (getPeriodResponse) {
@@ -37,8 +39,11 @@ message Result {
 }
 
 message Period {
+    option (gorm.opts).ormable = true;
     int32 id = 1;
     string period = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp updated_at = 4;
 }
 
 message getUserInfoRequest {
@@ -56,6 +61,7 @@ message getUserInfoResult {
 }
 
 message UserInfo {
+    option (gorm.opts).ormable = true;
     int32 user_info_id = 1;
     int32 user_id = 9;
     string last_name = 2;
