@@ -71,6 +71,8 @@ message UserInfo {
     int32 job_id = 6;
     bool enrollment_flg = 7;
     bool admin_flg = 8;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
 }
 
 enum ResponseStatus {

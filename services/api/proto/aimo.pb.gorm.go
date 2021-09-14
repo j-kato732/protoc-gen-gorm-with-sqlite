@@ -98,12 +98,14 @@ type PeriodWithAfterToPB interface {
 
 type UserInfoORM struct {
 	AdminFlg      bool
+	CreatedAt     *time.Time
 	DepartmentId  int32
 	EnrollmentFlg bool
 	FirstName     string
 	JobId         int32
 	LastName      string
 	Period        string
+	UpdatedAt     *time.Time
 	UserId        int32
 	UserInfoId    int32
 }
@@ -132,6 +134,12 @@ func (m *UserInfo) ToORM(ctx context.Context) (UserInfoORM, error) {
 	to.JobId = m.JobId
 	to.EnrollmentFlg = m.EnrollmentFlg
 	to.AdminFlg = m.AdminFlg
+	if m.CreatedAt != nil {
+		*to.CreatedAt = m.CreatedAt.AsTime()
+	}
+	if m.UpdatedAt != nil {
+		*to.UpdatedAt = m.UpdatedAt.AsTime()
+	}
 	if posthook, ok := interface{}(m).(UserInfoWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -157,6 +165,12 @@ func (m *UserInfoORM) ToPB(ctx context.Context) (UserInfo, error) {
 	to.JobId = m.JobId
 	to.EnrollmentFlg = m.EnrollmentFlg
 	to.AdminFlg = m.AdminFlg
+	if m.CreatedAt != nil {
+		to.CreatedAt = timestamppb.New(*m.CreatedAt)
+	}
+	if m.UpdatedAt != nil {
+		to.UpdatedAt = timestamppb.New(*m.UpdatedAt)
+	}
 	if posthook, ok := interface{}(m).(UserInfoWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -623,7 +637,9 @@ func DefaultApplyFieldMaskUserInfo(ctx context.Context, patchee *UserInfo, patch
 		return nil, errors.NilArgumentError
 	}
 	var err error
-	for _, f := range updateMask.Paths {
+	var updatedCreatedAt bool
+	var updatedUpdatedAt bool
+	for i, f := range updateMask.Paths {
 		if f == prefix+"UserInfoId" {
 			patchee.UserInfoId = patcher.UserInfoId
 			continue
@@ -658,6 +674,52 @@ func DefaultApplyFieldMaskUserInfo(ctx context.Context, patchee *UserInfo, patch
 		}
 		if f == prefix+"AdminFlg" {
 			patchee.AdminFlg = patcher.AdminFlg
+			continue
+		}
+		if !updatedCreatedAt && strings.HasPrefix(f, prefix+"CreatedAt.") {
+			if patcher.CreatedAt == nil {
+				patchee.CreatedAt = nil
+				continue
+			}
+			if patchee.CreatedAt == nil {
+				patchee.CreatedAt = &timestamp.Timestamp{}
+			}
+			childMask := &field_mask.FieldMask{}
+			for j := i; j < len(updateMask.Paths); j++ {
+				if trimPath := strings.TrimPrefix(updateMask.Paths[j], prefix+"CreatedAt."); trimPath != updateMask.Paths[j] {
+					childMask.Paths = append(childMask.Paths, trimPath)
+				}
+			}
+			if err := gorm1.MergeWithMask(patcher.CreatedAt, patchee.CreatedAt, childMask); err != nil {
+				return nil, nil
+			}
+		}
+		if f == prefix+"CreatedAt" {
+			updatedCreatedAt = true
+			patchee.CreatedAt = patcher.CreatedAt
+			continue
+		}
+		if !updatedUpdatedAt && strings.HasPrefix(f, prefix+"UpdatedAt.") {
+			if patcher.UpdatedAt == nil {
+				patchee.UpdatedAt = nil
+				continue
+			}
+			if patchee.UpdatedAt == nil {
+				patchee.UpdatedAt = &timestamp.Timestamp{}
+			}
+			childMask := &field_mask.FieldMask{}
+			for j := i; j < len(updateMask.Paths); j++ {
+				if trimPath := strings.TrimPrefix(updateMask.Paths[j], prefix+"UpdatedAt."); trimPath != updateMask.Paths[j] {
+					childMask.Paths = append(childMask.Paths, trimPath)
+				}
+			}
+			if err := gorm1.MergeWithMask(patcher.UpdatedAt, patchee.UpdatedAt, childMask); err != nil {
+				return nil, nil
+			}
+		}
+		if f == prefix+"UpdatedAt" {
+			updatedUpdatedAt = true
+			patchee.UpdatedAt = patcher.UpdatedAt
 			continue
 		}
 	}

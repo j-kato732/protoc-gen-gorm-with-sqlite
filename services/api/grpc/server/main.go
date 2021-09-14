@@ -65,59 +65,55 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 }
 
 func (s *getPeriodService) GetUserInfo(ctx context.Context, message *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
-	// // var userInfo pb.UserInfoORM
-	// // _
-	// // db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
-	// // if err != nil {
-	// // 	fmt.Println(err)
-	// // 	return nil, err
-	// // }
-	// // con, err := db.DB()
-	// // defer con.Close()
+	var userInfo pb.UserInfoORM
 
-	// // // var response_status int32
-	// // // var response_message string
+	db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	con, err := db.DB()
+	defer con.Close()
 
-	// // isExist := db.Migrator().HasTable("userInfos")
-	// // if isExist == false {
-	// // 	db.AutoMigrate(userInfo)
-	// // }
+	// var response_status int32
+	// var response_message string
 
-	// // if err = db.Where(pb.UserInfoORM{
-	// // 	UserId: 1,
-	// // 	Period: "202105",
-	// // }).Find(&userInfo).Error; err != nil {
-	// // 	fmt.Println(err)
-	// // } else {
-	// // 	response_status = 1
-	// // 	response_message = ""
-	// // }
+	isExist := db.Migrator().HasTable(userInfo.TableName())
+	if isExist == false {
+		db.AutoMigrate(userInfo)
+	}
 
-	// // // var response *pb.GetUserInfoResponse
+	result := db.Where(pb.UserInfoORM{
+		UserId: 1,
+		Period: "202105",
+	}).Find(&userInfo)
 
-	// // return &pb.GetUserInfoResponse{
-	// // 	Response: &pb.DefaultResponse{
-	// // 		Status:  response_status,
-	// // 		Message: response_message,
-	// // 	},
-	// // 	Result: &pb.GetUserInfoResult{
-	// // 		UserInfo: &pb.UserInfo{
-	// // 			UserInfoId:    int32(userInfo.ID),
-	// // 			UserId:        userInfo.UserId,
-	// // 			LastName:      userInfo.LastName,
-	// // 			FirstName:     userInfo.FirstName,
-	// // 			Period:        userInfo.Period,
-	// // 			DepartmentId:  userInfo.DepartmentId,
-	// // 			JobId:         userInfo.JobId,
-	// // 			EnrollmentFlg: userInfo.EnrollmentFlg,
-	// // 			AdminFlg:      userInfo.AdminFlg,
-	// // 		},
-	// // 	},
-	// // }, nil
-	// return nil, nil
-	// // SELECT * FROM userInfo where user_id = ? and period = ?;
-	// // if err := psql_db.Find(&)
-	// // if err := db.Where("user_id = ? AND period = ?", "jinzhu", "22").Find(&users)
+	if result.Error != nil {
+		fmt.Println(result.Error)
+	}
+	if result.RowsAffected == 0 {
+		response_status = 10
+		response_message = "userId 1 was not found"
+	} else {
+		response_status = 1
+		response_message = ""
+	}
+
+	response_userInfo, _ := userInfo.ToPB(ctx)
+	// var response *pb.GetUserInfoResponse
+
+	return &pb.GetUserInfoResponse{
+		Response: &pb.DefaultResponse{
+			Status:  response_status,
+			Message: response_message,
+		},
+		Result: &pb.GetUserInfoResult{
+			UserInfo: &response_userInfo,
+		},
+	}, nil
+	// SELECT * FROM userInfo where user_id = ? and period = ?;
+	// if err := psql_db.Find(&)
+	// if err := db.Where("user_id = ? AND period = ?", "jinzhu", "22").Find(&users)
 }
 
 func main() {
