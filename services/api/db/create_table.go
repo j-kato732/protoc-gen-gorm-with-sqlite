@@ -4,24 +4,19 @@ import (
 	"fmt"
 	// "reflect"
 
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"grpc_gateway_sample/db/model"
-	// pb "grpc_gateway_sample/proto"
-)
-
-const (
-	conn = "host=db port=5432 user=admin password=password+1 dbname=testdb sslmode=disable TimeZone=Asia/Shanghai"
+	pb "grpc_gateway_sample/proto"
 )
 
 var (
-	periods   []model.Period
-	userInfos model.UserInfo
+	periods   pb.PeriodORM
+	userInfos pb.UserInfoORM
 )
 
 func main() {
-	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("./db/testdb"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 	}
