@@ -8,17 +8,16 @@ import (
 	// "reflect"
 
 	"google.golang.org/grpc"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	// db "grpc_gateway_sample/db"
-	"grpc_gateway_sample/db/model"
 	pb "grpc_gateway_sample/proto"
 )
 
 const (
-	conn = "host=db port=5432 user=admin password=password+1 dbname=testdb sslmode=disable TimeZone=Asia/Shanghai"
-	port = ":8080"
+	db_path = "./db/test.db"
+	port    = ":8080"
 )
 
 type getPeriodService struct {
@@ -26,21 +25,21 @@ type getPeriodService struct {
 }
 
 var (
-	periods          []model.Period
+	periods_orm      []pb.PeriodORM
 	response_status  int32
 	response_message string
 )
 
 func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodRequest) (*pb.GetPeriodResponse, error) {
-	psql_db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 	}
-	con, err := psql_db.DB()
+	con, err := db.DB()
 	defer con.Close()
 
 	// SELECT * from period;
-	if err := psql_db.Find(&periods).Error; err != nil {
+	if err := db.Find(&periods_orm).Error; err != nil {
 		log.Println(err)
 		return nil, err
 	} else {
@@ -49,11 +48,9 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 	}
 
 	var response_periods []*pb.Period
-	for _, period := range periods {
-		response_periods = append(response_periods, &pb.Period{
-			Id:     int32(period.ID),
-			Period: period.Period,
-		})
+	for _, period := range periods_orm {
+		result, _ := period.ToPB(ctx)
+		response_periods = append(response_periods, &result)
 	}
 
 	return &pb.GetPeriodResponse{
@@ -68,58 +65,59 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 }
 
 func (s *getPeriodService) GetUserInfo(ctx context.Context, message *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
-	var userInfo model.UserInfo
+	// // var userInfo pb.UserInfoORM
+	// // _
+	// // db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
+	// // if err != nil {
+	// // 	fmt.Println(err)
+	// // 	return nil, err
+	// // }
+	// // con, err := db.DB()
+	// // defer con.Close()
 
-	psql_db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	con, err := psql_db.DB()
-	defer con.Close()
+	// // // var response_status int32
+	// // // var response_message string
 
-	// var response_status int32
-	// var response_message string
+	// // isExist := db.Migrator().HasTable("userInfos")
+	// // if isExist == false {
+	// // 	db.AutoMigrate(userInfo)
+	// // }
 
-	isExist := psql_db.Migrator().HasTable("userInfos")
-	if isExist == false {
-		psql_db.AutoMigrate(userInfo)
-	}
+	// // if err = db.Where(pb.UserInfoORM{
+	// // 	UserId: 1,
+	// // 	Period: "202105",
+	// // }).Find(&userInfo).Error; err != nil {
+	// // 	fmt.Println(err)
+	// // } else {
+	// // 	response_status = 1
+	// // 	response_message = ""
+	// // }
 
-	if err = psql_db.Where(model.UserInfo{
-		UserId: 1,
-		Period: "202105",
-	}).Find(&userInfo).Error; err != nil {
-		fmt.Println(err)
-	} else {
-		response_status = 1
-		response_message = ""
-	}
+	// // // var response *pb.GetUserInfoResponse
 
-	// var response *pb.GetUserInfoResponse
-
-	return &pb.GetUserInfoResponse{
-		Response: &pb.DefaultResponse{
-			Status:  response_status,
-			Message: response_message,
-		},
-		Result: &pb.GetUserInfoResult{
-			UserInfo: &pb.UserInfo{
-				UserInfoId:    int32(userInfo.ID),
-				UserId:        userInfo.UserId,
-				LastName:      userInfo.LastName,
-				FirstName:     userInfo.FirstName,
-				Period:        userInfo.Period,
-				DepartmentId:  userInfo.DepartmentId,
-				JobId:         userInfo.JobId,
-				EnrollmentFlg: userInfo.EnrollmentFlg,
-				AdminFlg:      userInfo.AdminFlg,
-			},
-		},
-	}, nil
-	// SELECT * FROM userInfo where user_id = ? and period = ?;
-	// if err := psql_db.Find(&)
-	// if err := db.Where("user_id = ? AND period = ?", "jinzhu", "22").Find(&users)
+	// // return &pb.GetUserInfoResponse{
+	// // 	Response: &pb.DefaultResponse{
+	// // 		Status:  response_status,
+	// // 		Message: response_message,
+	// // 	},
+	// // 	Result: &pb.GetUserInfoResult{
+	// // 		UserInfo: &pb.UserInfo{
+	// // 			UserInfoId:    int32(userInfo.ID),
+	// // 			UserId:        userInfo.UserId,
+	// // 			LastName:      userInfo.LastName,
+	// // 			FirstName:     userInfo.FirstName,
+	// // 			Period:        userInfo.Period,
+	// // 			DepartmentId:  userInfo.DepartmentId,
+	// // 			JobId:         userInfo.JobId,
+	// // 			EnrollmentFlg: userInfo.EnrollmentFlg,
+	// // 			AdminFlg:      userInfo.AdminFlg,
+	// // 		},
+	// // 	},
+	// // }, nil
+	// return nil, nil
+	// // SELECT * FROM userInfo where user_id = ? and period = ?;
+	// // if err := psql_db.Find(&)
+	// // if err := db.Where("user_id = ? AND period = ?", "jinzhu", "22").Find(&users)
 }
 
 func main() {

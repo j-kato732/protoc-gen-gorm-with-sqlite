@@ -16,7 +16,7 @@ var (
 )
 
 func main() {
-	db, err := gorm.Open(sqlite.Open("./db/testdb"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("./db/test.db"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 	}

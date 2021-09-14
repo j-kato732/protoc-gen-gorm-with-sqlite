@@ -20,22 +20,22 @@ $ protoc -I .:${GOPATH}/src --grpc-gateway_out . --grpc-gateway_opt logtostderr=
 protoc -I .:${GOPATH}/src --gorm_out . --gorm_opt paths=source_relative proto/aimo.proto
 ```
 
-# install postgre client
+# connect database in container
 ```
-$ brew install postgresql
+$ sqlite3 db/testdb
 ```
-# How to connect
+# show table
 ```
-$ psql -h localhost -p 10030 -U admin
+$ .table
 ```
-# Create dabatase
+# sqlite web(コンテナ用ポートを開けていないのでホスト側から共有しているDBファイルを指定する)
+pythonが入っていない場合はpythonを入れる
 ```
-$ create dabatase dbname
-$ \l
+brew install python3
 ```
-# connect database
 ```
-$ psql -h localhost -p 10030 -U admin -d testdb
+$ pip3 install sqlite-web
+$ sqlite_web /path/to/database.db
 ```
 
 # Create Table
