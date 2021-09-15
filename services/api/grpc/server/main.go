@@ -116,6 +116,42 @@ func (s *getPeriodService) GetUserInfo(ctx context.Context, message *pb.GetUserI
 	// if err := db.Where("user_id = ? AND period = ?", "jinzhu", "22").Find(&users)
 }
 
+func (s *getPeriodService) PostUserInfo(ctx context.Context, request *pb.UserInfo) (*pb.PostUserInfoResponse, error) {
+	db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	con, err := db.DB()
+	defer con.Close()
+
+	request_orm, err := request.ToORM(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result := db.Create(&request_orm)
+	if result.Error != nil {
+		fmt.Println(result.Error)
+	}
+	if result.RowsAffected == 0 {
+		response_status = 10
+		response_message = "failed create"
+	} else {
+		response_status = 0
+		response_message = ""
+	}
+
+	return &pb.PostUserInfoResponse{
+		Response: &pb.DefaultResponse{
+			Status:  response_status,
+			Message: response_message,
+		},
+		Result: &pb.PostUserInfoResponsePostUserInfoResult{
+			UserId: request.Id,
+		},
+	}, nil
+}
+
 func main() {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

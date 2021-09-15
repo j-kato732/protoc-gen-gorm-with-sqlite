@@ -20,6 +20,13 @@ service aimo {
             get: "/userInfo"
         };
     }
+
+    rpc postUserInfo(UserInfo) returns (postUserInfoResponse) {
+        option (google.api.http) = {
+            post: "/userInfo"
+            body: "*"
+        };
+    }
 }
 
 message getPeriodRequest{}
@@ -56,13 +63,21 @@ message getUserInfoResponse {
     getUserInfoResult result = 2;
 }
 
+message postUserInfoResponse {
+    DefaultResponse response = 1;
+    message postUserInfoResult {
+        int32 user_id = 2;
+    }
+    postUserInfoResult result = 3;
+}
+
 message getUserInfoResult {
     UserInfo user_info = 1;
 }
 
 message UserInfo {
     option (gorm.opts).ormable = true;
-    int32 user_info_id = 1;
+    int32 id = 1; 
     int32 user_id = 9;
     string last_name = 2;
     string first_name = 3;

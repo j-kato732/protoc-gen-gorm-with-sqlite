@@ -17,7 +17,12 @@ $ protoc -I .:${GOPATH}/src --grpc-gateway_out . --grpc-gateway_opt logtostderr=
 
 ```
 // gormモデルの生成
-protoc -I .:${GOPATH}/src --gorm_out . --gorm_opt paths=source_relative proto/aimo.proto
+$ protoc -I .:${GOPATH}/src --gorm_out . --gorm_opt paths=source_relative proto/aimo.proto
+```
+
+// happy set
+```
+protoc -I .:${GOPATH}/src --go_out ./ --go_opt paths=source_relative     --go-grpc_out ./ --go-grpc_opt paths=source_relative --grpc-gateway_out . --grpc-gateway_opt logtostderr=true --grpc-gateway_opt paths=source_relative --gorm_out . --gorm_opt paths=source_relative proto/aimo.proto
 ```
 
 # connect database in container
