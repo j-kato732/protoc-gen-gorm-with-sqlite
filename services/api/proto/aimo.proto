@@ -27,6 +27,13 @@ service aimo {
             body: "*"
         };
     }
+
+    rpc updateUserInfo(UserInfo) returns (DefaultResponse) {
+        option (google.api.http) = {
+            put: "/userInfo"
+            body: "*"
+        };
+    }
 }
 
 message getPeriodRequest{}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -65,6 +66,10 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 }
 
 func (s *getPeriodService) GetUserInfo(ctx context.Context, message *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
+	if message.UserId == 0 || len(message.Period) == 0 {
+		return nil, errors.New("invalid params")
+	}
+
 	var userInfo pb.UserInfoORM
 
 	db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
@@ -84,8 +89,8 @@ func (s *getPeriodService) GetUserInfo(ctx context.Context, message *pb.GetUserI
 	}
 
 	result := db.Where(pb.UserInfoORM{
-		UserId: 1,
-		Period: "202105",
+		UserId: message.UserId,
+		Period: message.Period,
 	}).Find(&userInfo)
 
 	if result.Error != nil {
@@ -137,7 +142,7 @@ func (s *getPeriodService) PostUserInfo(ctx context.Context, request *pb.UserInf
 		response_status = 10
 		response_message = "failed create"
 	} else {
-		response_status = 0
+		response_status = 1
 		response_message = ""
 	}
 
@@ -149,6 +154,33 @@ func (s *getPeriodService) PostUserInfo(ctx context.Context, request *pb.UserInf
 		Result: &pb.PostUserInfoResponsePostUserInfoResult{
 			UserId: request.Id,
 		},
+	}, nil
+}
+
+func (s *getPeriodService) UpdateUserInfo(ctx context.Context, request *pb.UserInfo) (*pb.DefaultResponse, error) {
+	db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	con, err := db.DB()
+	defer con.Close()
+
+	request_orm, err := request.ToORM(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result := db.Model(&request_orm).Updates(request_orm)
+	if result.Error != nil {
+		fmt.Println(result.Error)
+	} else {
+		response_status = 1
+		response_message = ""
+	}
+
+	return &pb.DefaultResponse{
+		Status:  response_status,
+		Message: response_message,
 	}, nil
 }
 
