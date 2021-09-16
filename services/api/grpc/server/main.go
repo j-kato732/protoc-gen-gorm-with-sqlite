@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 
 	// db "grpc_gateway_sample/db"
+	db "grpc_gateway_sample/action"
 	pb "grpc_gateway_sample/proto"
 )
 
@@ -32,26 +33,10 @@ var (
 )
 
 func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodRequest) (*pb.GetPeriodResponse, error) {
-	db, err := gorm.Open(sqlite.Open(db_path), &gorm.Config{})
+	result, err := db.GetPeriod(ctx)
 	if err != nil {
-		fmt.Println(err)
-	}
-	con, err := db.DB()
-	defer con.Close()
-
-	// SELECT * from period;
-	if err := db.Find(&periods_orm).Error; err != nil {
-		log.Println(err)
-		return nil, err
-	} else {
-		response_status = 1
-		response_message = ""
-	}
-
-	var response_periods []*pb.Period
-	for _, period := range periods_orm {
-		result, _ := period.ToPB(ctx)
-		response_periods = append(response_periods, &result)
+		response_status = 255
+		response_message = "faild GetPeriod"
 	}
 
 	return &pb.GetPeriodResponse{
@@ -60,7 +45,7 @@ func (s *getPeriodService) GetPeriod(ctx context.Context, message *pb.GetPeriodR
 			Message: response_message,
 		},
 		Result: &pb.Result{
-			Period: response_periods,
+			Period: result,
 		},
 	}, nil
 }
